@@ -1,0 +1,70 @@
+Purchase:
+  actAs: { Timestampable: ~ }
+  columns:
+    purchase_number:        string(255)
+    transaction_id:         string(255)
+    product_total:          { type: decimal(10), scale: 2 }
+    tax_total:              { type: decimal(10), scale: 2 }
+    savings_total:          { type: decimal(10), scale: 2 }
+    grand_total:            { type: decimal(10), scale: 2 }
+    payment_status:         string(25)
+    bill_first_name:        string(100)
+    bill_last_name:         string(100)
+    bill_company:           string(50)
+    bill_street:            string(100)
+    bill_street_2:          string(100)
+    bill_city:              string(100)
+    bill_region:            string(100)
+    bill_region_other:      string(25)
+    bill_postal_code:       string(20)
+    bill_country:           string(80)
+    bill_phone:             string(25)
+    bill_fax:               string(25)
+    coupon_code:            string(255)
+    user_id:                integer
+  relations:
+    User:
+      class: User
+      local: user_id
+      foreign: id
+      foreignAlias: Purchases
+      onDelete: CASCADE
+            
+PurchaseProduct:
+  columns:
+    purchase_id:
+      type: integer
+      primary: true
+    product_id:
+      type: integer
+      primary: true
+    quantity:               integer
+    base_price:             { type: decimal(10), scale: 2 }
+    options_price:          { type: decimal(10), scale: 2 }
+    handling_subtotal:      { type: decimal(10), scale: 2 }
+    item_total:             { type: decimal(10), scale: 2 }
+    item_subtotal:          { type: decimal(10), scale: 2 }
+  relations:
+    Product:
+      class: Product
+      local: product_id
+      foreign: id
+      foreignAlias: PurchaseProducts
+      onDelete: CASCADE
+    Purchase:
+      class: Purchase
+      local: purchase_id
+      foreign: id
+      foreignAlias: PurchaseProducts
+      onDelete: CASCADE
+    
+PromoCode:
+  columns:
+    name:                   string(100)
+    code:                   string(100)
+    percent_discount:       { type: decimal(4), scale: 2 }
+    flat_discount:          { type: decimal(10), scale: 2 }
+    num_uses:               integer
+    use_count:              integer
+    valid_from:             timestamp
+    valid_to:               timestamp
