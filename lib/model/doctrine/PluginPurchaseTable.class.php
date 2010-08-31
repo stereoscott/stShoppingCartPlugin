@@ -4,7 +4,7 @@
  */
 class PluginPurchaseTable extends Doctrine_Table
 {
-  public function getNextPurchaseNumber()
+  public function getMaxPurchaseNumber()
   {
     $q = Doctrine_Query::create()
       ->select('MAX(p.purchase_number) as max_purchase_number')
