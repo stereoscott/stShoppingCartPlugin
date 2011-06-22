@@ -14,4 +14,5 @@ class PluginPurchaseTable extends Doctrine_Table
     
     return isset($result[0]['max_purchase_number']) ? ($result[0]['max_purchase_number']) : 0;
   }
+  
 }

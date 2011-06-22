@@ -21,14 +21,19 @@ Purchase:
     bill_phone:             string(25)
     bill_fax:               string(25)
     coupon_code:            string(255)
-    user_id:                integer
+    user_id:                integer(5)
+    merchant_account_id:    integer
   relations:
     User:
-      class: User
+      class: sfGuardUser
       local: user_id
-      foreign: id
       foreignAlias: Purchases
-      onDelete: CASCADE
+      onDelete: CASCADE  
+    MerchantAccount:
+      local: merchant_account_id
+      foreign: id
+      onDelete: SET NULL
+      foreignAlias: Purchases
             
 PurchaseProduct:
   columns:
@@ -44,6 +49,7 @@ PurchaseProduct:
     handling_subtotal:      { type: decimal(10), scale: 2 }
     item_total:             { type: decimal(10), scale: 2 }
     item_subtotal:          { type: decimal(10), scale: 2 }
+    term:                   string(255) #monthly, yearly, single
   relations:
     Product:
       class: Product
@@ -62,9 +68,37 @@ PromoCode:
   columns:
     name:                   string(100)
     code:                   string(100)
-    percent_discount:       { type: decimal(4), scale: 2 }
+    percent_discount:       { type: decimal(5), scale: 2 }
     flat_discount:          { type: decimal(10), scale: 2 }
     num_uses:               integer
     use_count:              integer
     valid_from:             timestamp
     valid_to:               timestamp
+    
+PromoCodeProduct:
+  columns:
+    promo_code_id:
+      type: integer
+      primary: true
+    product_id:
+      type: integer
+      primary: true
+  relations:
+    Product:
+      class: Product
+      local: product_id
+      foreign: id
+      foreignAlias: PromoCodeProducts
+      onDelete: CASCADE
+    PromoCode:
+      class: PromoCode
+      local: promo_code_id
+      foreign: id
+      foreignAlias: PromoCodeProducts
+      onDelete: CASCADE
+
+MerchantAccount:
+  columns:
+    id:         { type: integer, primary: true, autoincrement: true }
+    name:       string(255)
+    config_key: { type: string(30), unique: true }

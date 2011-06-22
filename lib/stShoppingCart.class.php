@@ -13,17 +13,19 @@
 class stShoppingCart
 {
   protected
-    $items   = array(),
-    $orderId = null,
+    $items             = array(),
+    $orderId           = null,
     $tax,
-    $flatDiscount = null,
-    $percentDiscount = null,
+    $flatDiscount      = null,
+    $percentDiscount   = null,
+    $promoCode         = null,
     $is_unit_price_ttc = false;
 
   /**
-   * Constructs a shopping cart with the given tax as a parameter.
+   * Constructs a shopping cart.
    * Tax is a percentage.
    *
+   * @param  sfUser
    * @param  integer
    */
   public function __construct($tax = 0)
@@ -71,7 +73,7 @@ class stShoppingCart
   {
     $this->tax = $tax;
   }
-
+  
   public function getFlatDiscount() {
     return $this->flatDiscount;
   }
@@ -86,6 +88,28 @@ class stShoppingCart
 
   public function setPercentDiscount($v) {
     $this->percentDiscount = $v;
+  }
+
+  public function getPromoCode() {
+    return $this->promoCode;
+  }
+
+  public function setPromoCode($v) {
+    $this->promoCode = $v;
+  }
+  
+  public function setPromoCodeObject($promoCode)
+  {
+    $this->setPromoCode($promoCode->getCode());
+    $this->setFlatDiscount($promoCode->getFlatDiscount());
+    $this->setPercentDiscount($promoCode->getPercentDiscount());
+  }
+  
+  public function clearPromoCode()
+  {
+    $this->setPromoCode(null);
+    $this->setFlatDiscount(0);
+    $this->setPercentDiscount(0);
   }
 
   
@@ -218,6 +242,7 @@ class stShoppingCart
     
     return $total_ht;
   }
+  
   /**
    * Returns total price for all items in the shopping cart.
    *
@@ -291,6 +316,17 @@ class stShoppingCart
 
     return $items;
   }
+  
+  /**
+   * In the cases where we only allow one item in the cart at a time, this returns 
+   * a single stShoppingCartItem.
+   *
+   * @return stShoppingCartItem
+   */
+  public function getCurrentItem()
+  {
+    return current($this->getItems());
+  }
 
   /**
    * Returns the number of items in the shopping cart.
@@ -327,9 +363,11 @@ class stShoppingCart
   /**
    * Removes all items from the shopping cart.
    */
-  public function clear()
+  public function clear($clearDiscounts = true)
   {
     $this->items = array();
+    $this->setFlatDiscount(0);
+    $this->setPercentDiscount(0);
   }
 
   /**

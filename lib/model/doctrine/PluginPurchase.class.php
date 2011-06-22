@@ -5,13 +5,57 @@
  */
 abstract class PluginPurchase extends BasePurchase
 {
-  public function generatePurchaseNumber()
+  public function __toString()
   {
-    $maxNumber = Doctrine::getTable('Purchase')->getMaxPurchaseNumber();
-    if (!$maxNumber) {
-      $maxNumber = date('Y').str_pad(330, 7, "0", STR_PAD_LEFT);
+    
+    $str = '';
+    if ($date = $this->getCreatedAt()) {
+      $str .= date('m/d/Y', strtotime($date));
     }
     
-    return $maxNumber + 1;
+    $str .= ' / '.$this->getProductNames();
+    /*
+    if ($total = $this->getProductTotal()) {
+      $str .= ' / $'.$total;
+    }
+    */
+    return $str;
+  }
+  
+  public function getProductNames() 
+  {
+    $names = array();
+    
+    $results = Doctrine_Core::getTable('Product')->
+      createQuery('product')->
+      select('product.id, product.name')->
+      innerJoin('product.PurchaseProducts pp')->
+      where('pp.purchase_id = ?', $this['id'])->
+      fetchArray();
+    
+    foreach ($results as $result) {
+      $names[] = $result['name'];
+    }
+    
+    return implode(', ', $names);
+  }
+  
+  /**
+   * Admin generator tries to load the wrong column, bill_street2
+   *
+   * @return void
+   */
+  public function getBillStreet2()
+  {
+    return parent::_get('bill_street_2');
+  }
+    
+  public function preInsert($event)
+  {
+    $record = $event->getInvoker();
+
+    if ( ! $record->purchase_number) {
+        $record->purchase_number = Doctrine::getTable('Purchase')->generatePurchaseNumber();
+    }
   }
 }
