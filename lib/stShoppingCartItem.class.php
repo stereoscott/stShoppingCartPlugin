@@ -6,19 +6,21 @@
  * This class represents a shopping cart item.
  *
  * @package    symfony.runtime.addon
- * @author     Fabien Potencier <fabien.potencier@symfony-project.com>
  * @author     Scott Meves
  */
 class stShoppingCartItem
 {
   private
-    $quantity         = 0,
-    $price            = 0,
-    $discount         = 0,
-    $weight           = 0,
-    $class            = '',
-    $id               = 0,
-    $parameter_holder = null;
+    $quantity          = 0,
+    $price             = 0, // price today, or trial price
+    //$price_after_trial = 0, // only for products with a trial_period
+    $trial_price       = 0,
+    $trial_period      = null,
+    $discount          = 0,
+    $weight            = 0,
+    $class             = '',
+    $id                = 0,
+    $parameter_holder  = null;
 
   /**
    * Constructs a new item to store in the shopping cart.
@@ -96,6 +98,55 @@ class stShoppingCartItem
   {
     $this->price = $price;
   }
+  
+  /**
+   * Returns trial price.
+   *
+   * @return float
+   */
+  public function getTrialPrice()
+  {
+    return $this->trial_price;
+  }
+
+  /**
+   * Sets trial price.
+   *
+   * @param float
+   */
+  public function setTrialPrice($trial_price)
+  {
+    $this->trial_price = $trial_price;
+  }
+  
+  public function getPriceDueToday()
+  {
+    return $this->getTrialPeriod() ? $this->getTrialPrice() : $this->getPrice();
+  }
+  
+  public function getPriceAfterTrial()
+  {
+    return $this->getTrialPeriod() ? $this->getPrice() : false;
+  }
+  
+  /*
+  public function getPriceAfterTrial() {
+    return $this->price_after_trial;
+  }
+
+  public function setPriceAfterTrial($v) {
+    $this->price_after_trial = $v;
+  }
+  */
+  
+  public function getTrialPeriod() {
+    return $this->trial_period;
+  }
+
+  public function setTrialPeriod($v) {
+    $this->trial_period = $v;
+  }
+
 
   /**
    * Returns shopping cart.
@@ -225,14 +276,24 @@ class stShoppingCartItem
   {
     $purchaseProduct = new PurchaseProduct();
     $purchaseProduct->setProduct($this->getObject());
-    $purchaseProduct->product_id = $this->getId();
-    $purchaseProduct->quantity = $this->getQuantity();
-    $purchaseProduct->base_price = $this->getPrice();
-    $purchaseProduct->options_price = 0;
-    $purchaseProduct->handling_subtotal = 0;
-    $purchaseProduct->item_subtotal = ($this->getPrice() * $this->getQuantity());
-    $purchaseProduct->item_total = ($this->getPrice() * $this->getQuantity());
     
+    $itemTotal = $this->getPrice() * $this->getQuantity();
+    $purchaseProduct->fromArray(array(
+      'product_id' => $this->getId(),
+      'quantity' => $this->getQuantity(),
+      'base_price' => $this->getPrice(),
+      'options_price' => 0,
+      'handling_subtotal' => 0,
+      'item_subtotal' => $itemTotal,
+      'item_total' => $itemTotal,
+      'trial_price' => $this->getTrialPrice(),
+      'trial_period' => $this->getTrialPeriod(),
+    ));
+    
+    if ($term = $this->getParameter('term')) {
+      $purchaseProduct->term = $term;
+    }
+
     return $purchaseProduct;
   }
 }

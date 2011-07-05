@@ -7,6 +7,8 @@ Purchase:
     tax_total:              { type: decimal(10), scale: 2 }
     savings_total:          { type: decimal(10), scale: 2 }
     grand_total:            { type: decimal(10), scale: 2 }
+    total_after_trial:      { type: decimal(10), scale: 2 }
+    trial_period:           integer #in days
     payment_status:         string(25)
     bill_first_name:        string(100)
     bill_last_name:         string(100)
@@ -50,6 +52,8 @@ PurchaseProduct:
     item_total:             { type: decimal(10), scale: 2 }
     item_subtotal:          { type: decimal(10), scale: 2 }
     term:                   string(255) #monthly, yearly, single
+    trial_price:            { type: decimal(10), scale: 2 }
+    trial_period:           integer #in days
   relations:
     Product:
       class: Product

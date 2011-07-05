@@ -170,6 +170,8 @@ class stShoppingCart
     {
       $this->items[] = $item;
     }
+    
+    return $this;
   }
 
   /**
@@ -253,24 +255,24 @@ class stShoppingCart
     $total_ht = 0;
 
     foreach ($this->getItems() as $item)
-    {
+    { 
       if ($this->is_unit_price_ttc)
-      {
-        $total_ht += $item->getQuantity() * $item->getPrice() * (1 - $item->getDiscount() / 100) / (1 + $this->tax / 100);
+      {  
+        $total_ht += $item->getQuantity() * $item->getPriceDueToday() * (1 - $item->getDiscount() / 100) / (1 + $this->tax / 100);
       }
       else
       {
-        $total_ht += $item->getQuantity() * $item->getPrice() * (1 - $item->getDiscount() / 100);
+        $total_ht += $item->getQuantity() * $item->getPriceDueToday() * (1 - $item->getDiscount() / 100);
       }
     }
     
     $total_ht = $this->applyDiscounts($total_ht);
 
     return $total_ht;
-  }
+  }  
 
   /**
-   * Returns total price for all items in the shopping cart with taxes added.
+   * Returns total price due immediately for all items in the shopping cart with taxes added. 
    *
    * This is equivalent to <code>$cart->getTotal() * (1 + $cart->getTax() / 100)</code>
    *
@@ -284,11 +286,11 @@ class stShoppingCart
     {
       if ($this->is_unit_price_ttc)
       {
-        $total_ttc += $item->getQuantity() * $item->getPrice() * (1 - $item->getDiscount() / 100);
+        $total_ttc += $item->getQuantity() * $item->getPriceDueToday() * (1 - $item->getDiscount() / 100);
       }
       else
       {
-        $total_ttc += $item->getQuantity() * $item->getPrice() * (1 - $item->getDiscount() / 100) * (1 + $this->tax / 100);
+        $total_ttc += $item->getQuantity() * $item->getPriceDueToday() * (1 - $item->getDiscount() / 100) * (1 + $this->tax / 100);
       }
     }
     
@@ -297,6 +299,54 @@ class stShoppingCart
     return $total_ttc;
   }
 
+
+  /**
+   * Returns the total price due after the trial period.
+   *
+   * @return void
+   */
+  public function getTotalAfterTrial()
+  {
+    $total_ht = 0;
+
+    foreach ($this->getItems() as $item)
+    {      
+      if ($price = $item->getPriceAfterTrial()) {
+        if ($this->is_unit_price_ttc)
+        {
+          $total_ht += $item->getQuantity() * $price * (1 - $item->getDiscount() / 100) / (1 + $this->tax / 100);
+        }
+        else
+        {
+          $total_ht += $item->getQuantity() * $price * (1 - $item->getDiscount() / 100);
+        }
+      }
+    }
+    
+    $total_ht = $this->applyDiscounts($total_ht);
+
+    return $total_ht;
+  }
+  
+  public function getTrialPeriod()
+  {
+    if ($item = $this->getCurrentItem()) {
+      return $item->getTrialPeriod();
+    } else {
+      return false;
+    }
+  }
+  
+  /**
+   * Return true if we need to process this cart with a transaction through the payment gateway.
+   *
+   * @return boolean
+   */
+  public function requiresTransaction()
+  {
+    return ($this->getTotal() || $this->getTotalAfterTrial());
+  }
+  
   /**
    * Returns all items (sfShoppingCart objects) in the shopping cart.
    *
@@ -317,6 +367,7 @@ class stShoppingCart
     return $items;
   }
   
+
   /**
    * In the cases where we only allow one item in the cart at a time, this returns 
    * a single stShoppingCartItem.
@@ -368,6 +419,8 @@ class stShoppingCart
     $this->items = array();
     $this->setFlatDiscount(0);
     $this->setPercentDiscount(0);
+    
+    return $this;
   }
 
   /**
