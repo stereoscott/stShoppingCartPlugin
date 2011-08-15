@@ -22,6 +22,17 @@ abstract class PluginPurchase extends BasePurchase
     return $str;
   }
   
+  public function createPurchaseProduct($productId, $quantity = 1)
+  {
+    $pp = new PurchaseProduct();
+    
+    $pp['product_id'] = $productId;
+    $pp['quantity'] = $quantity;
+    $pp['purchase_id'] = $this['id'];
+    
+    return $pp;
+  }
+  
   public function getProductNames() 
   {
     $names = array();
