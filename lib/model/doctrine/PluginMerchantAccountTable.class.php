@@ -16,4 +16,21 @@ class PluginMerchantAccountTable extends Doctrine_Table
     {
         return Doctrine_Core::getTable('PluginMerchantAccount');
     }
+    
+    /**
+     * Efficiently return the primary key of the merchant account with this config key.
+     *
+     * @param string $key 
+     * @return int ID
+     */
+    public function selectIdFromKey($key)
+    {
+      $q = Doctrine_Query::create()
+          ->select('m.id')
+          ->from('MerchantAccount m')
+          ->addWhere('m.config_key = ?');
+      $results = $q->execute(array($key), Doctrine_Core::HYDRATE_NONE);
+      
+      return isset($results[0][0]) ? $results[0][0] : null;
+    }
 }

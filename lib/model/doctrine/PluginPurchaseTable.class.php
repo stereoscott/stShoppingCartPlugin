@@ -15,4 +15,14 @@ class PluginPurchaseTable extends Doctrine_Table
     return isset($result[0]['max_purchase_number']) ? ($result[0]['max_purchase_number']) : 0;
   }
   
+  public function generatePurchaseNumber()
+  {
+    $maxNumber = $this->getMaxPurchaseNumber();
+    if (!$maxNumber) {
+      $maxNumber = date('Y').str_pad(330, 7, "0", STR_PAD_LEFT);
+    }
+    
+    return $maxNumber + 1;
+  }
+  
 }
