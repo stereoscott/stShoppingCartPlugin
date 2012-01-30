@@ -97,12 +97,48 @@ class stShoppingCart
   public function setPromoCode($v) {
     $this->promoCode = $v;
   }
-  
+
+  /**
+   * Check if this promo code can be applied to this cart
+   * based on the current product selection
+   *
+   * @param PromoCode $promoCode 
+   * @return boolean $isValid
+   */
+  public function isPromoCodeValidForProducts(PromoCode $promoCode)
+  {
+    $isValid = true;
+    
+    if ($promoCode && count($promoCode['PromoCodeProducts'])) {
+      $isValid = false;
+      // only apply this promo code if we have the right products in the cart
+      // a promo code may have multiple related products... we only need one of them to match
+      $objectIds = $this->getObjectIds();
+      
+      if (isset($objectIds['Product'])) {
+        // there are products in cart
+        $promoCodeProductIds = $promoCode->getProductIds();
+        
+        foreach ($promoCodeProductIds as $productId) {
+          foreach ($objectIds['Product'] as $objectId) {
+            if ($objectId == $productId) {
+              $isValid = true;
+              break 2;
+            }
+          }          
+        }
+      }
+      
+    }
+    
+    return $isValid;
+  }
+    
   public function setPromoCodeObject($promoCode)
   {
     $this->setPromoCode($promoCode->getCode());
     $this->setFlatDiscount($promoCode->getFlatDiscount());
-    $this->setPercentDiscount($promoCode->getPercentDiscount());
+    $this->setPercentDiscount($promoCode->getPercentDiscount());      
   }
   
   public function clearPromoCode()
@@ -441,22 +477,13 @@ class stShoppingCart
   }
 
   /**
-   * Returns an array of all Propel objects (items) in the shopping cart, ordered by class.
+   * Returns an array of all Doctrine objects (items) in the shopping cart, ordered by class.
    *
-   * This method can only be called if all items are Propel objects.
+   * This method can only be called if all items are Doctrine objects.
    */
   public function getObjects()
   {
-    $object_ids = array();
-    foreach ($this->getItems() as $item)
-    {
-      if (!array_key_exists($item->getClass(), $object_ids))
-      {
-        $object_ids[$item->getClass()] = array();
-      }
-
-      $object_ids[$item->getClass()][] = $item->getId();
-    }
+    $object_ids = $this->getObjectIds();
 
     $objects = array();
     foreach ($object_ids as $class => $ids)
@@ -466,6 +493,29 @@ class stShoppingCart
     }
 
     return $objects;
+  }
+  
+  /**
+   * Return a multi-dimensional array where the array keys are the item classes
+   * and each contains an array of ids
+   *
+   * @return void
+   */
+  public function getObjectIds()
+  {
+    $object_ids = array();
+    
+    foreach ($this->getItems() as $item)
+    {
+      if (!array_key_exists($item->getClass(), $object_ids))
+      {
+        $object_ids[$item->getClass()] = array();
+      }
+
+      $object_ids[$item->getClass()][] = $item->getId();
+    }
+    
+    return $object_ids;
   }
 }
 

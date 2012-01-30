@@ -78,6 +78,11 @@ PromoCode:
     use_count:              integer
     valid_from:             timestamp
     valid_to:               timestamp
+  relations:
+    Products:
+      foreignAlias:         PromoCodes
+      class:                Product
+      refClass:             PromoCodeProduct
     
 PromoCodeProduct:
   columns:

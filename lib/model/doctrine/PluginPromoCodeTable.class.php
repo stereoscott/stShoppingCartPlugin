@@ -4,6 +4,15 @@
  */
 class PluginPromoCodeTable extends Doctrine_Table
 {
+  /**
+   * Validator is placed in here in the table class because it is used 
+   * in a few different forms: CheckoutPageOneForm, PromoCodeCheckoutForm, RegistrationForm
+   *
+   * @param string $validator 
+   * @param string $code 
+   * @return $code
+   * @throws sfValidatorError
+   */
   public static function validateCode($validator, $code) 
   {
     if (($promoCode = self::findValidByCode($code)) && $promoCode->exists())
@@ -38,5 +47,22 @@ class PluginPromoCodeTable extends Doctrine_Table
       ->andWhere('p.valid_from IS NULL OR p.valid_from <= ?', array($now))
       ->andWhere('p.valid_to IS NULL OR p.valid_to >= ?', array($now))
       ->fetchOne();
+  }
+  
+  public static function createCode($length = 10) 
+  { 
+    $chars = "ABCDEFGHIJKLMNPQRSTUVWXYZ123456789"; 
+    $count = 34;
+    $i = 0; 
+    $pass = ''; 
+
+    while ($i <= $length) { 
+        $num = rand(0,34);
+        $tmp = substr($chars, $num, 1); 
+        $pass .= $tmp;  // ((($i==0) || $i%4) ? '' : '-') . 
+        $i++; 
+    } 
+
+    return $pass;
   }
 }

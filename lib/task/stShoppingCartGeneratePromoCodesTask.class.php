@@ -45,31 +45,19 @@ EOF;
     error_reporting(E_ALL | E_STRICT);
     */
     
-    $sql = "INSERT INTO promo_code (name, code, percent_discount, num_uses, use_count) VALUES ('SF Fire Credit Union', '%s', 100, 1, 0);";
+    // make this a task option
+    $cobrand = Doctrine::getTable('Cobrand')->findOneByCode('proponentfcu');
+    
+    $cobrandId = $cobrand ? $cobrand['id'] : 'NULL';
+        
+    $sql = "INSERT INTO promo_code (name, code, percent_discount, num_uses, use_count, cobrand_id) VALUES ('Proponent FCU', '%s', 100, 1, 0, '%s');";
     for ($i = 0; $i < $options['num']; $i++) {
-      $code = $this->createCode();      
-      $stmt = $connection->prepare(sprintf($sql, $code));
+      $code = PromoCodeTable::createCode();
+      $stmt = $connection->prepare(sprintf($sql, $code, $cobrandId));
       $stmt->execute();
       
       echo $code."\n";      
     }
-  }
-  
-  protected function createCode() 
-  { 
-    $chars = "ABCDEFGHIJKLMNPQRSTUVWXYZ123456789"; 
-    $count = 34;
-    $i = 0; 
-    $pass = ''; 
-
-    while ($i <= 10) { 
-        $num = rand(0,34);
-        $tmp = substr($chars, $num, 1); 
-        $pass .= $tmp;  // ((($i==0) || $i%4) ? '' : '-') . 
-        $i++; 
-    } 
-
-    return $pass;
   }
   
 }

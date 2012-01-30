@@ -15,4 +15,22 @@ abstract class PluginPromoCode extends BasePromoCode
     
     return $this->save($conn);
   }
+  
+  public function getProductIds()
+  {
+    $ids = array();
+    
+    $results = Doctrine_Query::create()
+      ->select('p.product_id')
+      ->from('PromoCodeProduct p')
+      ->where('p.promo_code_id = ?', $this->getId())
+      ->setHydrationMode(Doctrine::HYDRATE_NONE)
+      ->execute();
+      
+    foreach ($results as $r) {
+      $ids[$r[0]] = $r[0];
+    }
+    
+    return $ids;
+  }
 }
