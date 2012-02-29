@@ -37,7 +37,7 @@ abstract class PluginPurchase extends BasePurchase
   {
     $names = array();
     
-    $results = Doctrine_Core::getTable('Product')->
+    $results = Doctrine::getTable('Product')->
       createQuery('product')->
       select('product.id, product.name')->
       innerJoin('product.PurchaseProducts pp')->

@@ -486,10 +486,14 @@ class stShoppingCart
     $object_ids = $this->getObjectIds();
 
     $objects = array();
+
     foreach ($object_ids as $class => $ids)
     {
-      $q = Doctrine::getTable($class)->createQuery('p')->where('p.id in (?)', $ids);      
-      $objects = array_merge($objects, $q->fetchArray());
+      $q = Doctrine::getTable($class)->createQuery('p')->whereIn('p.id', $ids);      
+      $results = $q->execute();
+      foreach ($results as $object) {
+        $objects[] = $object;
+      }
     }
 
     return $objects;

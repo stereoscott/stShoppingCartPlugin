@@ -29,7 +29,7 @@ class PluginMerchantAccountTable extends Doctrine_Table
           ->select('m.id')
           ->from('MerchantAccount m')
           ->addWhere('m.config_key = ?');
-      $results = $q->execute(array($key), Doctrine_Core::HYDRATE_NONE);
+      $results = $q->execute(array($key), Doctrine::HYDRATE_NONE);
       
       return isset($results[0][0]) ? $results[0][0] : null;
     }
