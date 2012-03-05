@@ -61,6 +61,36 @@ abstract class PluginPurchase extends BasePurchase
     return parent::_get('bill_street_2');
   }
     
+    
+  /**
+   * Return the common 'term' (yearly or monthly) for all products in this purchase
+   * returns false if not all purchase_products have the same term
+   */
+  public function getTerm()
+  {
+    $term = null;
+    
+    foreach ($this['PurchaseProducts'] as $purchaseProduct) {
+      if ($term === null) {
+        $term = $purchaseProduct['term'];
+      } elseif ($term != $purchaseProduct['term']) {
+        return false;
+      }
+    }
+    
+    return $term;
+  }
+    
+  public function isYearly()
+  {
+    return $this->getTerm() == 'yearly';
+  }
+  
+  public function isMonthly()
+  {
+    return $this->getTerm() == 'monthly';
+  }
+  
   public function preInsert($event)
   {
     $record = $event->getInvoker();
@@ -68,5 +98,19 @@ abstract class PluginPurchase extends BasePurchase
     if ( ! $record->purchase_number) {
         $record->purchase_number = Doctrine::getTable('Purchase')->generatePurchaseNumber();
     }
+  }
+  
+  /**
+   * Used to generate an invoice number
+   *
+   * @param string $conn 
+   * @return Purchase
+   */
+  public static function createTemporaryPurchase($conn = null)
+  {
+    $purchase = new Purchase();
+    $purchase->save($conn);
+    
+    return $purchase;
   }
 }

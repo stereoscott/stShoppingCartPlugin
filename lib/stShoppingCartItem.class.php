@@ -271,7 +271,12 @@ class stShoppingCartItem
   {
     return $this->getShoppingCart()->getObject($this->getClass(), $this->getId());
   }
-  
+
+  /**
+   * Create a new PurchaseProduct instance (unsaved) from this shopping cart item.
+   *
+   * @return PurchaseProduct
+   */
   public function getPurchaseProduct()
   {
     $purchaseProduct = new PurchaseProduct();
